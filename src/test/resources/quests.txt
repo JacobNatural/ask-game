@@ -1,0 +1,3 @@
+A;geography;What is the name of the Polish sea?;Caspian Sea-false;Baltic Sea-true;Black Sea-false;
+A;science;Popular phone in the USA?;Nokia-false;iPhone-true;Android-false;
+B;geography;What is the name of the longest river in Poland?;Vistula-true;Oder-false;Warta-false;

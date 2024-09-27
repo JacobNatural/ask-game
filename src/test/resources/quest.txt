@@ -1,0 +1,2 @@
+A;science;Popular phone in the USA?;Nokia-false;iPhone-true;Android-false;
+A;science;Popular phone in the USA?;Nokia-false;iPhone-true;Android-false;

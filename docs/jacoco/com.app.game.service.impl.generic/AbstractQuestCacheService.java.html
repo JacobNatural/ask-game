@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AbstractQuestCacheService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Ask_Game_Maven</a> &gt; <a href="index.source.html" class="el_package">com.app.game.service.impl.generic</a> &gt; <span class="el_source">AbstractQuestCacheService.java</span></div><h1>AbstractQuestCacheService.java</h1><pre class="source lang-java linenums">package com.app.game.service.impl.generic;
+
+import com.app.game.service.QuestCacheService;
+import com.app.quest.Quest;
+import com.app.repository.QuestRepository;
+
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+/**
+ * Abstract class providing common functionality for caching quests in the game.
+ *
+ * &lt;p&gt;This class implements the {@link QuestCacheService} interface and provides methods for
+ * retrieving and refreshing cached quests. The quests are stored in a map, where the key is
+ * a generic type {@code T} (determined by subclasses), and the value is a list of {@link Quest} objects.
+ *
+ * @param &lt;T&gt; the type of key used to group quests in the cache (e.g., by difficulty level, category, etc.)
+ */
+public abstract class AbstractQuestCacheService&lt;T&gt; implements QuestCacheService&lt;T&gt; {
+
+    /**
+     * Repository for retrieving quests from the data source.
+     */
+    protected final QuestRepository&lt;Long&gt; questRepository;
+
+    /**
+     * Cache storing the quests grouped by the generic type {@code T}.
+     */
+    protected Map&lt;T, List&lt;Quest&gt;&gt; quests;
+
+    /**
+     * Constructor that initializes the quest repository and sets the cache to {@code null}.
+     *
+     * @param questRepository the repository used to fetch quests from the data source
+     */
+<span class="fc" id="L37">    protected AbstractQuestCacheService(QuestRepository&lt;Long&gt; questRepository) {</span>
+<span class="fc" id="L38">        this.questRepository = questRepository;</span>
+<span class="fc" id="L39">        this.quests = null;</span>
+<span class="fc" id="L40">    }</span>
+
+    /**
+     * Retrieves all cached quests.
+     *
+     * @return a map where the key is of type {@code T} and the value is a list of quests.
+     */
+    @Override
+    public Map&lt;T, List&lt;Quest&gt;&gt; getAll() {
+<span class="fc" id="L49">        return quests;</span>
+    }
+
+    /**
+     * Refreshes the quest cache by grouping quests based on the provided mapping function.
+     *
+     * &lt;p&gt;The {@code map} function is used to determine the grouping key (of type {@code T}) for each quest.
+     *
+     * @param map a function that maps a {@link Quest} to a key of type {@code T} used for grouping
+     * @throws IllegalArgumentException if the {@code map} function is {@code null}
+     */
+    @Override
+    public void refresh(Function&lt;Quest, T&gt; map) {
+
+<span class="fc bfc" id="L63" title="All 2 branches covered.">        if (map == null) {</span>
+<span class="fc" id="L64">            throw new IllegalArgumentException(&quot;Mapper cannot be null&quot;);</span>
+        }
+
+<span class="fc" id="L67">        quests = questRepository</span>
+<span class="fc" id="L68">                .getQuests()</span>
+<span class="fc" id="L69">                .stream()</span>
+<span class="fc" id="L70">                .collect(Collectors.groupingBy(map));</span>
+<span class="fc" id="L71">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

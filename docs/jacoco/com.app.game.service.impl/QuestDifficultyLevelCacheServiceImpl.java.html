@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>QuestDifficultyLevelCacheServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Ask_Game_Maven</a> &gt; <a href="index.source.html" class="el_package">com.app.game.service.impl</a> &gt; <span class="el_source">QuestDifficultyLevelCacheServiceImpl.java</span></div><h1>QuestDifficultyLevelCacheServiceImpl.java</h1><pre class="source lang-java linenums">package com.app.game.service.impl;
+
+import com.app.difficulty_level.DifficultyLevel;
+import com.app.game.service.QuestCacheService;
+import com.app.game.service.impl.generic.AbstractQuestCacheService;
+import com.app.quest.QuestMapper;
+import com.app.repository.QuestRepository;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.PostConstruct;
+
+/**
+ * Service implementation for caching quests based on their difficulty levels.
+ *
+ * &lt;p&gt;This class extends {@link AbstractQuestCacheService} to provide caching functionality
+ * specifically for quests grouped by their {@link DifficultyLevel}. It initializes the cache
+ * with quests upon construction.
+ */
+@Service
+public class QuestDifficultyLevelCacheServiceImpl extends AbstractQuestCacheService&lt;DifficultyLevel&gt;
+        implements QuestCacheService&lt;DifficultyLevel&gt; {
+
+    /**
+     * Constructor that initializes the quest repository.
+     *
+     * @param questRepositoryImpl the repository used to fetch quests from the data source
+     */
+    public QuestDifficultyLevelCacheServiceImpl(QuestRepository&lt;Long&gt; questRepositoryImpl) {
+<span class="fc" id="L29">        super(questRepositoryImpl);</span>
+<span class="fc" id="L30">    }</span>
+
+    /**
+     * Post-construct method that refreshes the quest cache with quests grouped by difficulty level.
+     * This method is called after the bean is constructed and the dependencies are injected.
+     */
+    @PostConstruct
+    public void postConstruct() {
+<span class="fc" id="L38">        refresh(QuestMapper.toDifficulty);</span>
+<span class="fc" id="L39">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>QuestServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Ask_Game_Maven</a> &gt; <a href="index.source.html" class="el_package">com.app.game.service.impl</a> &gt; <span class="el_source">QuestServiceImpl.java</span></div><h1>QuestServiceImpl.java</h1><pre class="source lang-java linenums">package com.app.game.service.impl;
+
+import com.app.difficulty_level.DifficultyLevel;
+import com.app.dto.AnswersDto;
+import com.app.game.service.QuestCacheService;
+import com.app.game.service.QuestService;
+import com.app.quest.Quest;
+import com.app.repository.QuestRepository;
+import com.app.txt.save.FileWriter;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Random;
+import java.util.function.Function;
+
+/**
+ * Service implementation for managing quests in the game.
+ *
+ * &lt;p&gt;This class provides methods to add, remove, find, save quests, generate random quests,
+ * and calculate points based on player answers.
+ */
+@Service
+@RequiredArgsConstructor
+public class QuestServiceImpl implements QuestService&lt;DifficultyLevel&gt; {
+    private final QuestRepository&lt;Long&gt; questRepository;
+    private final QuestCacheService&lt;DifficultyLevel&gt; questCacheService;
+    private final FileWriter&lt;Quest&gt; questFileWriter;
+
+    @Value(&quot;${amountOfAsk}&quot;)
+    private final int AMOUNT_OF_ASK = 4;
+
+    /**
+     * Adds a new quest to the repository.
+     *
+     * @param quest the {@link Quest} object to be added
+     * @throws IllegalArgumentException if the quest is {@code null} or already exists in the repository
+     */
+    @Override
+    public void addQuest(Quest quest) {
+<span class="fc bfc" id="L44" title="All 2 branches covered.">        if (quest == null) {</span>
+<span class="fc" id="L45">            throw new IllegalArgumentException(&quot;Quest cannot be null&quot;);</span>
+        }
+
+<span class="fc bfc" id="L48" title="All 2 branches covered.">        if (questRepository.containsValue(quest)) {</span>
+<span class="fc" id="L49">            throw new IllegalArgumentException(&quot;Quest already exists&quot;);</span>
+        }
+<span class="fc" id="L51">        questRepository.addQuest(quest);</span>
+<span class="fc" id="L52">    }</span>
+
+    /**
+     * Removes a quest from the repository by ID.
+     *
+     * @param playerID the unique ID of the quest to be removed
+     * @throws IllegalArgumentException if the quest with the specified ID is not found
+     */
+    @Override
+    public void removePlayer(Long playerID) {
+<span class="fc bfc" id="L62" title="All 2 branches covered.">        if (!questRepository.containsID(playerID)) {</span>
+<span class="fc" id="L63">            throw new IllegalArgumentException(&quot;Quest not found&quot;);</span>
+        }
+
+<span class="fc" id="L66">        questRepository.removeByID(playerID);</span>
+<span class="fc" id="L67">    }</span>
+
+    /**
+     * Finds a quest by its unique ID.
+     *
+     * @param questID the unique ID of the quest
+     * @return the {@link Quest} object if found
+     * @throws IllegalArgumentException if the quest is not found
+     */
+    @Override
+    public Quest findQuest(Long questID) {
+<span class="fc bfc" id="L78" title="All 2 branches covered.">        if (!questRepository.containsID(questID)) {</span>
+<span class="fc" id="L79">            throw new IllegalArgumentException(&quot;Quest not found&quot;);</span>
+        }
+
+<span class="fc" id="L82">        return questRepository.findByID(questID);</span>
+    }
+
+    /**
+     * Saves the current list of quests to a text file using a specified format.
+     *
+     * @param filename    the name of the file where quests will be saved
+     * @param toTxtFormat a function that converts a {@link Quest} object to a text format
+     * @throws IllegalArgumentException if the {@code toTxtFormat} function is {@code null}
+     */
+    @Override
+    public void saveQuestToTxt(String filename, Function&lt;Quest, String&gt; toTxtFormat) {
+<span class="fc bfc" id="L94" title="All 2 branches covered.">        if (toTxtFormat == null) {</span>
+<span class="fc" id="L95">            throw new IllegalArgumentException(&quot;ToTxtFormat cannot be null&quot;);</span>
+        }
+
+<span class="fc" id="L98">        questFileWriter.save(filename, questRepository.getQuests(), toTxtFormat);</span>
+<span class="fc" id="L99">    }</span>
+
+    /**
+     * Generates a list of random quests limited to the predefined amount.
+     *
+     * @return a list of randomly selected {@link Quest} objects
+     * @throws IllegalArgumentException if there are not enough quests available
+     */
+    @Override
+    public List&lt;Quest&gt; generateRandomsQuests() {
+<span class="fc" id="L109">        return questCacheService</span>
+<span class="fc" id="L110">                .getAll()</span>
+<span class="fc" id="L111">                .values()</span>
+<span class="fc" id="L112">                .stream()</span>
+<span class="fc" id="L113">                .map(questList -&gt; getRandomLimited(AMOUNT_OF_ASK, questList))</span>
+<span class="fc" id="L114">                .flatMap(Collection::stream)</span>
+<span class="fc" id="L115">                .toList();</span>
+    }
+
+    /**
+     * Calculates the total points for a player's answers.
+     *
+     * @param answersDto the {@link AnswersDto} containing player answers
+     * @return the total points calculated from the answers
+     * @throws IllegalArgumentException if the {@code answersDto} is {@code null}
+     */
+    @Override
+    public int calculatePoints(AnswersDto answersDto) {
+<span class="fc bfc" id="L127" title="All 2 branches covered.">        if (answersDto == null) {</span>
+<span class="fc" id="L128">            throw new IllegalArgumentException(&quot;AnswersDto cannot be null&quot;);</span>
+        }
+<span class="fc" id="L130">        return answersDto</span>
+<span class="fc" id="L131">                .answers()</span>
+<span class="fc" id="L132">                .entrySet()</span>
+<span class="fc" id="L133">                .stream()</span>
+<span class="fc" id="L134">                .map(answerDto -&gt; calculatePoint(answerDto.getKey(), answerDto.getValue()))</span>
+<span class="fc" id="L135">                .reduce(Integer::sum)</span>
+<span class="fc" id="L136">                .orElseThrow();</span>
+    }
+
+    /**
+     * Calculates the points for a specific answer to a quest.
+     *
+     * @param questId the unique ID of the quest
+     * @param answer  the player's answer
+     * @return the points awarded for the given answer
+     * @throws IllegalArgumentException if the quest is not found or the answer is not valid
+     */
+    private int calculatePoint(Long questId, String answer) {
+<span class="fc bfc" id="L148" title="All 2 branches covered.">        if (!questRepository.containsID(questId)) {</span>
+<span class="fc" id="L149">            throw new IllegalArgumentException(&quot;Quest not found&quot;);</span>
+        }
+
+<span class="fc" id="L152">        var quest = questRepository.findByID(questId);</span>
+
+<span class="fc bfc" id="L154" title="All 2 branches covered.">        if (!quest.containAnswer(answer)) {</span>
+<span class="fc" id="L155">            throw new IllegalArgumentException(&quot;Answer not found&quot;);</span>
+        }
+
+<span class="fc" id="L158">        return quest.calculatePoints(answer);</span>
+    }
+
+    /**
+     * Retrieves a limited number of random quests from the provided list.
+     *
+     * @param n      the number of quests to retrieve
+     * @param quests the list of quests to select from
+     * @return a list of randomly selected {@link Quest} objects
+     * @throws IllegalArgumentException if there are not enough quests in the list
+     */
+    private List&lt;Quest&gt; getRandomLimited(int n, List&lt;Quest&gt; quests) {
+<span class="fc bfc" id="L170" title="All 2 branches covered.">        if (quests.size() &lt; n) {</span>
+<span class="fc" id="L171">            throw new IllegalArgumentException(&quot;Not enough quests&quot;);</span>
+        }
+<span class="fc" id="L173">        var randomAnswers = new ArrayList&lt;Quest&gt;();</span>
+<span class="fc bfc" id="L174" title="All 2 branches covered.">        for (int i = 0; i &lt; n; i++) {</span>
+<span class="fc" id="L175">            var randQuestion =</span>
+<span class="fc" id="L176">                    quests.get(new Random().nextInt(0, quests.size()));</span>
+<span class="fc" id="L177">            randomAnswers.add(randQuestion);</span>
+<span class="fc" id="L178">            quests.remove(randQuestion);</span>
+        }
+<span class="fc" id="L180">        return randomAnswers;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PlayerFileReader.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Ask_Game_Maven</a> &gt; <a href="index.source.html" class="el_package">com.app.txt.load.impl</a> &gt; <span class="el_source">PlayerFileReader.java</span></div><h1>PlayerFileReader.java</h1><pre class="source lang-java linenums">package com.app.txt.load.impl;
+
+import com.app.line_parser.LineParser;
+import com.app.txt.load.generic.AbstractFileReader;
+import com.app.txt.load.FileReader;
+import com.app.txt.model.PlayerData;
+import com.app.txt.transfer.Transfer;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+/**
+ * Implementation of the Load interface for loading PlayerData entities.
+ *
+ * &lt;p&gt;This class handles the loading of player data from a text file,
+ * utilizing a specified transfer mechanism and line parser.&lt;/p&gt;
+ */
+@Component
+public class PlayerFileReader extends AbstractFileReader&lt;PlayerData&gt; implements FileReader&lt;PlayerData&gt; {
+
+    /**
+     * Constructs a PlayerLoad instance with the specified transfer and parser.
+     *
+     * @param transfer the data transfer mechanism
+     * @param parser   the line parser for PlayerData
+     */
+    public PlayerFileReader(Transfer&lt;PlayerData&gt; transfer, LineParser&lt;PlayerData&gt; parser) {
+<span class="fc" id="L30">        super(transfer, parser);</span>
+<span class="fc" id="L31">    }</span>
+
+    /**
+     * Loads PlayerData from the specified file.
+     *
+     * &lt;p&gt;This method uses the transfer mechanism to read data from the file
+     * and parses each line into PlayerData objects. Duplicate logins are merged
+     * by updating their statistics.&lt;/p&gt;
+     *
+     * @param filename the name of the file to load data from
+     * @return a list of PlayerData objects
+     */
+    @Override
+    public List&lt;PlayerData&gt; load(String filename) {
+<span class="fc" id="L45">        return transfer</span>
+<span class="fc" id="L46">                .load(filename, parser)</span>
+<span class="fc" id="L47">                .stream()</span>
+<span class="fc" id="L48">                .collect(Collectors.toMap(</span>
+                        PlayerData::login,
+<span class="fc" id="L50">                        Function.identity(),</span>
+                        (v1, v2) -&gt; {
+<span class="fc" id="L52">                            v1.updateStatistic(v2.statistics());</span>
+<span class="fc" id="L53">                            return v1;</span>
+                        }))
+<span class="fc" id="L55">                .values()</span>
+<span class="fc" id="L56">                .stream()</span>
+<span class="fc" id="L57">                .toList();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

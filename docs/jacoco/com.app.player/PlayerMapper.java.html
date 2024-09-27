@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PlayerMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Ask_Game_Maven</a> &gt; <a href="index.source.html" class="el_package">com.app.player</a> &gt; <span class="el_source">PlayerMapper.java</span></div><h1>PlayerMapper.java</h1><pre class="source lang-java linenums">package com.app.player;
+
+import java.time.LocalDateTime;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.function.ToLongFunction;
+
+/**
+ * Interface for mapping {@link Player} objects to different representations.
+ *
+ * &lt;p&gt;This interface provides functions to extract the login, statistics,
+ * and ID from a {@code Player} instance.&lt;/p&gt;
+ */
+public interface PlayerMapper {
+
+    /**
+     * Function to extract the login from a Player.
+     */
+<span class="fc" id="L19">    Function&lt;Player, String&gt; toLogin = player -&gt; player.login;</span>
+
+    /**
+     * Function to extract statistics from a Player.
+     *
+     * @return a map of statistics where the key is a {@link LocalDateTime} and the value is an Integer.
+     */
+<span class="fc" id="L26">    Function&lt;Player, Map&lt;LocalDateTime, Integer&gt;&gt; toStatistic = player -&gt; player.statistics;</span>
+
+    /**
+     * Function to extract the ID from a Player.
+     *
+     * @return the ID of the player as a long.
+     */
+<span class="fc" id="L33">    ToLongFunction&lt;Player&gt; toId = player -&gt; player.id;</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
