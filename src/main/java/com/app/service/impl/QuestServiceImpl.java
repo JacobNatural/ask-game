@@ -27,6 +27,7 @@ public class QuestServiceImpl implements QuestService {
     private final QuestCacheService<DifficultyLevel> questCacheService;
     private final FromQuestWithAnswerToQuestData fromQuestWithAnswerToQuestData;
     private static final int AMOUNT_OF_ASK = 4;
+    private static final Random random = new Random();
     /**
      * Adds a new quest along with its associated answers to the repository.
      *
@@ -140,15 +141,11 @@ public class QuestServiceImpl implements QuestService {
         var randomAnswers = new ArrayList<QuestData>();
 
         for (int i = 0; i < n; i++) {
-            int randIndex = randNumber(0, quests.size());
+            int randIndex = random.nextInt(quests.size());
             var randQuestion = quests.get(randIndex);
             randomAnswers.add(randQuestion);
             quests.remove(randIndex);  // Remove by index to maintain list integrity
         }
         return randomAnswers;
-    }
-
-    private static int randNumber(int min, int max){
-        return new Random().nextInt(min, max);
     }
 }
