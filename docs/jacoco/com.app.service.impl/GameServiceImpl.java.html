@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GameServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ask-game</a> &gt; <a href="index.source.html" class="el_package">com.app.service.impl</a> &gt; <span class="el_source">GameServiceImpl.java</span></div><h1>GameServiceImpl.java</h1><pre class="source lang-java linenums">package com.app.service.impl;
+
+import com.app.dto.AnswersDto;
+import com.app.dto.QuestDto;
+import com.app.service.GameService;
+import com.app.service.QuestService;
+import com.app.model.quest.QuestData;
+import com.app.repository.StatisticRepository;
+import com.app.repository.model.Statistic;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Implementation of the GameService interface, providing methods for generating quests
+ * and checking answers. This service interacts with the QuestService and the StatisticRepository
+ * to perform its operations.
+ */
+@Service
+@ToString
+@RequiredArgsConstructor
+public class GameServiceImpl implements GameService {
+    private final QuestService questService;
+    private final StatisticRepository statisticRepository;
+
+    /**
+     * Generates a list of random quests and converts them to QuestDto objects.
+     *
+     * @return a list of QuestDto representing the generated quests
+     */
+    @Override
+    public List&lt;QuestDto&gt; generateQuests() {
+<span class="fc" id="L37">        return questService</span>
+<span class="fc" id="L38">                .generateRandomsQuests()</span>
+<span class="fc" id="L39">                .stream()</span>
+<span class="fc" id="L40">                .map(QuestData::createQuestDto)</span>
+<span class="fc" id="L41">                .toList();</span>
+    }
+
+    /**
+     * Checks the provided answers against the correct ones, calculates the score,
+     * and saves the statistics for the player.
+     *
+     * @param answersDto the DTO containing the player's answers
+     * @return a Map.Entry containing the time the statistic was recorded and the score
+     * @throws IllegalArgumentException if the answersDto is null
+     */
+    @Override
+    public Map.Entry&lt;LocalDateTime, Integer&gt; checkAnswers(AnswersDto answersDto) {
+<span class="fc bfc" id="L54" title="All 2 branches covered.">        if (answersDto == null) {</span>
+<span class="fc" id="L55">            throw new IllegalArgumentException(&quot;AnswersDto cannot be null&quot;);</span>
+        }
+
+        // Calculate points based on the provided answers
+<span class="fc" id="L59">        var points = questService.calculatePoints(answersDto);</span>
+
+        // Save the statistic for the player's score
+<span class="fc" id="L62">        var statistic = statisticRepository.save(</span>
+<span class="fc" id="L63">                new Statistic(null, answersDto.playerId(), LocalDateTime.now(), points)</span>
+        );
+
+        // Return the time the statistic was recorded and the score
+<span class="fc" id="L67">        return Map.entry(statistic.getStat_time(), statistic.getScore());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

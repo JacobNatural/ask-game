@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StatisticRepositoryImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ask-game</a> &gt; <a href="index.source.html" class="el_package">com.app.repository.impl</a> &gt; <span class="el_source">StatisticRepositoryImpl.java</span></div><h1>StatisticRepositoryImpl.java</h1><pre class="source lang-java linenums">package com.app.repository.impl;
+
+import com.app.repository.StatisticRepository;
+import com.app.repository.impl.generic.impl.AbstractCrudRepository;
+import com.app.repository.model.Statistic;
+import org.jdbi.v3.core.Jdbi;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+/**
+ * Implementation of the StatisticRepository interface for managing player statistics.
+ * This class provides methods to retrieve and delete statistics associated with players.
+ */
+@Repository
+public class StatisticRepositoryImpl extends AbstractCrudRepository&lt;Statistic, Long&gt; implements StatisticRepository {
+    public StatisticRepositoryImpl(Jdbi jdbi) {
+<span class="fc" id="L18">        super(jdbi);</span>
+<span class="fc" id="L19">    }</span>
+
+    /**
+     * Retrieves a list of statistics associated with a specific player ID.
+     *
+     * @param playerId The ID of the player whose statistics are to be retrieved.
+     * @return A list of Statistic objects related to the specified player ID.
+     */
+    public List&lt;Statistic&gt; findByPlayerId(Long playerId) {
+<span class="fc" id="L28">        var sql = &quot;SELECT * FROM statistics WHERE player_id = :playerId&quot;;</span>
+
+<span class="fc" id="L30">        return jdbi.withHandle(handle -&gt;</span>
+                handle
+<span class="fc" id="L32">                        .createQuery(sql)</span>
+<span class="fc" id="L33">                        .bind(&quot;playerId&quot;, playerId)</span>
+<span class="fc" id="L34">                        .mapToBean(Statistic.class)</span>
+<span class="fc" id="L35">                        .list());</span>
+    }
+
+    /**
+     * Deletes statistics associated with a specific player ID and returns the deleted statistics.
+     *
+     * @param playerId The ID of the player whose statistics are to be deleted.
+     * @return A list of Statistic objects that were deleted, associated with the specified player ID.
+     */
+    public List&lt;Statistic&gt; deleteByPlayerId(Long playerId) {
+<span class="fc" id="L45">        var sql = &quot;delete from statistics where player_id = :playerId&quot;;</span>
+
+<span class="fc" id="L47">        var statistic = findByPlayerId(playerId);</span>
+
+<span class="fc" id="L49">        jdbi.useHandle(handle -&gt;</span>
+<span class="fc" id="L50">                handle.createUpdate(sql)</span>
+<span class="fc" id="L51">                        .bind(&quot;playerId&quot;, playerId)</span>
+<span class="fc" id="L52">                        .execute());</span>
+
+<span class="fc" id="L54">        return statistic;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

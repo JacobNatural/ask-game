@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PlayersWithStatisticsRepositoryImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ask-game</a> &gt; <a href="index.source.html" class="el_package">com.app.repository.impl</a> &gt; <span class="el_source">PlayersWithStatisticsRepositoryImpl.java</span></div><h1>PlayersWithStatisticsRepositoryImpl.java</h1><pre class="source lang-java linenums">package com.app.repository.impl;
+
+import com.app.repository.PlayersWithStatisticsRepository;
+import com.app.repository.model.PlayerWithStatistic;
+import lombok.RequiredArgsConstructor;
+import org.jdbi.v3.core.Jdbi;
+import org.springframework.stereotype.Repository;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+/**
+ * Implementation of the PlayersWithStatisticsRepository interface for managing player statistics.
+ * Uses JDBI for database operations.
+ */
+@Repository
+@RequiredArgsConstructor
+public class PlayersWithStatisticsRepositoryImpl implements PlayersWithStatisticsRepository {
+    private final Jdbi jdbi;
+
+    /**
+     * Retrieves the statistics for a specific player by their ID.
+     *
+     * @param id The ID of the player whose statistics are to be retrieved.
+     * @return A list of PlayerWithStatistic objects containing the player's statistics.
+     */
+    public List&lt;PlayerWithStatistic&gt; findPlayerWithStatistic(Long id) {
+<span class="fc" id="L28">        var sql = &quot;&quot;&quot;</span>
+                SELECT p.id, p.login, s.stat_time, s.score
+                FROM players p 
+                JOIN statistics s ON p.id = s.player_id 
+                WHERE p.id = :id;
+                &quot;&quot;&quot;;
+
+<span class="fc" id="L35">        return jdbi.withHandle(handle -&gt;</span>
+<span class="fc" id="L36">                handle.createQuery(sql)</span>
+<span class="fc" id="L37">                        .bind(&quot;id&quot;, id)</span>
+<span class="fc" id="L38">                        .mapToBean(PlayerWithStatistic.class)</span>
+<span class="fc" id="L39">                        .list());</span>
+    }
+
+    /**
+     * Retrieves all players along with their statistics.
+     *
+     * @return A list of PlayerWithStatistic objects for all players.
+     */
+    public List&lt;PlayerWithStatistic&gt; findPlayersWithStatistics() {
+<span class="fc" id="L48">        var sql = &quot;&quot;&quot;</span>
+                SELECT p.id, p.login, s.stat_time, s.score
+                FROM players p 
+                JOIN statistics s ON p.id = s.player_id;
+                &quot;&quot;&quot;;
+
+<span class="fc" id="L54">        return jdbi.withHandle(handle -&gt;</span>
+<span class="fc" id="L55">                handle.createQuery(sql)</span>
+<span class="fc" id="L56">                        .mapToBean(PlayerWithStatistic.class)</span>
+<span class="fc" id="L57">                        .list());</span>
+    }
+
+    /**
+     * Retrieves the best player based on the highest score.
+     *
+     * @return A list of PlayerWithStatistic objects for the player(s) with the highest score.
+     */
+    public List&lt;PlayerWithStatistic&gt; getTheBestPlayer() {
+<span class="fc" id="L66">        var sql = &quot;&quot;&quot;</span>
+                SELECT p.id, p.login, s.stat_time, s.score 
+                FROM players p 
+                JOIN statistics s ON p.id = s.player_id 
+                WHERE s.score = (SELECT MAX(score) FROM statistics);
+                &quot;&quot;&quot;;
+
+<span class="fc" id="L73">        return jdbi.withHandle(handle -&gt;</span>
+<span class="fc" id="L74">                handle.createQuery(sql)</span>
+<span class="fc" id="L75">                        .mapToBean(PlayerWithStatistic.class)</span>
+<span class="fc" id="L76">                        .list());</span>
+    }
+
+    /**
+     * Retrieves the best player within a specified time period based on the highest score.
+     *
+     * @param from The start date and time of the period.
+     * @param to   The end date and time of the period.
+     * @return A list of PlayerWithStatistic objects for the player(s) with the highest score in the specified period.
+     */
+    public List&lt;PlayerWithStatistic&gt; getTheBestPlayerInPeriod(LocalDateTime from, LocalDateTime to) {
+<span class="fc" id="L87">        var sql = &quot;&quot;&quot;</span>
+                SELECT p.id, p.login, s.stat_time, s.score 
+                FROM players p 
+                JOIN statistics s ON p.id = s.player_id 
+                WHERE s.stat_time BETWEEN :from AND :to 
+                AND s.score = (SELECT MAX(score) 
+                               FROM statistics s2 
+                               WHERE s2.stat_time BETWEEN :from AND :to);
+                &quot;&quot;&quot;;
+
+<span class="fc" id="L97">        return jdbi.withHandle(handle -&gt;</span>
+<span class="fc" id="L98">                handle.createQuery(sql)</span>
+<span class="fc" id="L99">                        .bind(&quot;from&quot;, from)</span>
+<span class="fc" id="L100">                        .bind(&quot;to&quot;, to)</span>
+<span class="fc" id="L101">                        .mapToBean(PlayerWithStatistic.class)</span>
+<span class="fc" id="L102">                        .list());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

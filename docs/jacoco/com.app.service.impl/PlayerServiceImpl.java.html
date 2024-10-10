@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PlayerServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ask-game</a> &gt; <a href="index.source.html" class="el_package">com.app.service.impl</a> &gt; <span class="el_source">PlayerServiceImpl.java</span></div><h1>PlayerServiceImpl.java</h1><pre class="source lang-java linenums">package com.app.service.impl;
+
+import com.app.converter.FromPlayerWithStatisticToPlayerData;
+import com.app.dto.PlayerDto;
+import com.app.repository.PlayersWithStatisticsRepository;
+import com.app.service.PlayerService;
+import com.app.model.player.PlayerData;
+import com.app.repository.PlayerRepository;
+import com.app.repository.model.Player;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Implementation of the PlayerService interface, providing methods for managing players,
+ * including adding, removing, and retrieving player statistics.
+ */
+@Service
+@RequiredArgsConstructor
+public class PlayerServiceImpl implements PlayerService {
+    private final PlayerRepository playerRepository;
+    private final PlayersWithStatisticsRepository playersWithStatisticsRepository;
+    private final FromPlayerWithStatisticToPlayerData fromPlayerWithStatisticToPlayerDataImpl;
+
+    /**
+     * Adds a new player using the provided PlayerDto.
+     *
+     * @param playerData the data of the player to be added
+     * @return PlayerData representing the added player
+     * @throws IllegalArgumentException if playerData is null
+     */
+    @Override
+    public PlayerData addPlayer(PlayerDto playerData) {
+<span class="fc bfc" id="L37" title="All 2 branches covered.">        if (playerData == null) {</span>
+<span class="fc" id="L38">            throw new IllegalArgumentException(&quot;PlayerDto cannot be null&quot;);</span>
+        }
+
+<span class="fc" id="L41">        return PlayerData.fromPlayer(</span>
+<span class="fc" id="L42">                playerRepository.save(new Player(playerData.id(), playerData.login()))</span>
+        );
+    }
+
+    /**
+     * Removes a player by their ID.
+     *
+     * @param id the ID of the player to be removed
+     * @return PlayerData representing the removed player
+     */
+    @Override
+    public PlayerData removePlayer(Long id) {
+<span class="fc" id="L54">        return PlayerData.fromPlayer(playerRepository.delete(id));</span>
+    }
+
+    /**
+     * Finds a player by their ID and returns their data.
+     *
+     * @param playerId the ID of the player to find
+     * @return PlayerData representing the found player
+     */
+    @Override
+    public PlayerData findPlayer(Long playerId) {
+<span class="fc" id="L65">        return fromPlayerWithStatisticToPlayerDataImpl</span>
+<span class="fc" id="L66">                .toList(playersWithStatisticsRepository.findPlayerWithStatistic(playerId))</span>
+<span class="fc" id="L67">                .getFirst();</span>
+    }
+
+    /**
+     * Retrieves the best player based on statistics.
+     *
+     * @return a list of PlayerData representing the best players
+     */
+    @Override
+    public List&lt;PlayerData&gt; getTheBestPlayer() {
+<span class="fc" id="L77">        return fromPlayerWithStatisticToPlayerDataImpl</span>
+<span class="fc" id="L78">                .toList(playersWithStatisticsRepository.getTheBestPlayer());</span>
+    }
+
+    /**
+     * Retrieves the best players within a specified time period.
+     *
+     * @param from the start date of the period
+     * @param to the end date of the period
+     * @return a list of PlayerData representing the best players in the period
+     * @throws IllegalArgumentException if from or to is null or if from is after to
+     */
+    @Override
+    public List&lt;PlayerData&gt; getTheBestPlayerInPeriod(LocalDateTime from, LocalDateTime to) {
+<span class="fc bfc" id="L91" title="All 2 branches covered.">        if (from == null) {</span>
+<span class="fc" id="L92">            throw new IllegalArgumentException(&quot;Start date cannot be null&quot;);</span>
+        }
+
+<span class="fc bfc" id="L95" title="All 2 branches covered.">        if (to == null) {</span>
+<span class="fc" id="L96">            throw new IllegalArgumentException(&quot;End date cannot be null&quot;);</span>
+        }
+
+<span class="fc bfc" id="L99" title="All 2 branches covered.">        if (from.isAfter(to)) {</span>
+<span class="fc" id="L100">            throw new IllegalArgumentException(&quot;Start date cannot be after end date&quot;);</span>
+        }
+
+<span class="fc" id="L103">        return fromPlayerWithStatisticToPlayerDataImpl.toList(playersWithStatisticsRepository</span>
+<span class="fc" id="L104">                .getTheBestPlayerInPeriod(from, to));</span>
+    }
+
+    /**
+     * Retrieves the ranking of players based on their scores.
+     *
+     * @return a map of player rankings where the key is the score and the value is the player's login
+     */
+    @Override
+    public Map&lt;Integer, String&gt; getRankingOfPlayers() {
+<span class="fc" id="L114">        return playerRepository.getPlayersRanking();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

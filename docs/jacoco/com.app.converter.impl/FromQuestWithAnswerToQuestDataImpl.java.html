@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FromQuestWithAnswerToQuestDataImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ask-game</a> &gt; <a href="index.source.html" class="el_package">com.app.converter.impl</a> &gt; <span class="el_source">FromQuestWithAnswerToQuestDataImpl.java</span></div><h1>FromQuestWithAnswerToQuestDataImpl.java</h1><pre class="source lang-java linenums">package com.app.converter.impl;
+
+import com.app.converter.FromQuestWithAnswerToQuestData;
+import com.app.model.quest.QuestData;
+import com.app.repository.model.Quest;
+import com.app.repository.model.QuestWithAnswer;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+/**
+ * Implementation of the {@link FromQuestWithAnswerToQuestData} interface, responsible for converting
+ * a list of {@link QuestWithAnswer} entities into {@link QuestData} objects.
+ */
+@Component
+<span class="fc" id="L21">public class FromQuestWithAnswerToQuestDataImpl implements FromQuestWithAnswerToQuestData {</span>
+
+    /**
+     * Converts a list of {@link QuestWithAnswer} entities into a list of {@link QuestData}.
+     * The resulting {@link QuestData} objects contain the quest information along with their associated answers.
+     *
+     * @param entityType List of {@link QuestWithAnswer} entities to convert.
+     * @return List of {@link QuestData} containing quest details and associated answers.
+     */
+    public List&lt;QuestData&gt; toList(List&lt;QuestWithAnswer&gt; entityType) {
+<span class="fc" id="L31">        return mergeData(entityType)</span>
+<span class="fc" id="L32">                .entrySet()</span>
+<span class="fc" id="L33">                .stream()</span>
+<span class="fc" id="L34">                .map(m -&gt; new QuestData(m.getKey(), m.getValue()))</span>
+<span class="fc" id="L35">                .toList();</span>
+    }
+
+    /**
+     * Converts a list of {@link QuestWithAnswer} entities into a map of keys (defined by the provided mapper)
+     * and their corresponding {@link QuestData} objects.
+     *
+     * @param playerWithStatistics List of {@link QuestWithAnswer} entities to convert.
+     * @param mapper Function that maps a {@link Quest} to a key of type T.
+     * @param &lt;T&gt; The type of the key in the resulting map.
+     * @return A map where the keys are generated using the mapper function and values are the corresponding {@link QuestData} objects.
+     */
+    public &lt;T&gt; Map&lt;T, QuestData&gt; toMap(List&lt;QuestWithAnswer&gt; playerWithStatistics, Function&lt;Quest, T&gt; mapper) {
+<span class="fc" id="L48">        return mergeData(playerWithStatistics)</span>
+<span class="fc" id="L49">                .entrySet()</span>
+<span class="fc" id="L50">                .stream()</span>
+<span class="fc" id="L51">                .collect(Collectors.toMap(</span>
+<span class="fc" id="L52">                        m -&gt; mapper.apply(m.getKey()),</span>
+<span class="fc" id="L53">                        m -&gt; new QuestData(m.getKey(), m.getValue())</span>
+                ));
+    }
+
+    /**
+     * Groups a list of {@link QuestWithAnswer} entities by keys (defined by the provided mapper)
+     * and returns a map where each key corresponds to a list of {@link QuestData}.
+     *
+     * @param playerWithStatistics List of {@link QuestWithAnswer} entities to convert.
+     * @param mapper Function that maps a {@link Quest} to a key of type T.
+     * @param &lt;T&gt; The type of the key in the resulting map.
+     * @return A map where the keys are generated using the mapper function and values are lists of corresponding {@link QuestData} objects.
+     */
+    public &lt;T&gt; Map&lt;T, List&lt;QuestData&gt;&gt; toGroupBy(List&lt;QuestWithAnswer&gt; playerWithStatistics, Function&lt;Quest, T&gt; mapper) {
+<span class="fc" id="L67">        return mergeData(playerWithStatistics)</span>
+<span class="fc" id="L68">                .entrySet()</span>
+<span class="fc" id="L69">                .stream()</span>
+<span class="fc" id="L70">                .collect(Collectors.toMap(</span>
+<span class="fc" id="L71">                        m -&gt; mapper.apply(m.getKey()),</span>
+<span class="fc" id="L72">                        m -&gt; new ArrayList&lt;&gt;(List.of(new QuestData(m.getKey(), m.getValue()))),</span>
+                        (v1, v2) -&gt; {
+<span class="fc" id="L74">                            v1.addAll(v2);</span>
+<span class="fc" id="L75">                            return v1;</span>
+                        }
+                ));
+    }
+
+    /**
+     * Merges the data from a list of {@link QuestWithAnswer} entities into a map where each key is a {@link Quest}
+     * and the value is a map of answers and their confirmation status.
+     *
+     * @param questWithAnswers List of {@link QuestWithAnswer} entities to merge.
+     * @return A map where keys are {@link Quest} objects and values are maps of answers (string) to their confirmation status (boolean).
+     */
+    private Map&lt;Quest, Map&lt;String, Boolean&gt;&gt; mergeData(List&lt;QuestWithAnswer&gt; questWithAnswers) {
+<span class="fc" id="L88">        return questWithAnswers</span>
+<span class="fc" id="L89">                .stream()</span>
+<span class="fc" id="L90">                .collect(Collectors.toMap(</span>
+<span class="fc" id="L91">                        s -&gt; new Quest(</span>
+<span class="fc" id="L92">                                s.getId(), s.getDifficultyLevel(),</span>
+<span class="fc" id="L93">                                s.getCategory(), s.getQuestion()),</span>
+<span class="fc" id="L94">                        s -&gt; new HashMap&lt;&gt;(Map.of(s.getAnswer(), s.getConfirm())),</span>
+                        (v1, v2) -&gt; {
+<span class="fc" id="L96">                            v1.putAll(v2);</span>
+<span class="fc" id="L97">                            return v1;</span>
+                        }
+                ));
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,69 +1,23 @@
 package com.app.repository;
 
-import com.app.player.Player;
+import com.app.repository.impl.generic.CrudRepository;
+import com.app.repository.model.Player;
 
-import java.util.List;
 import java.util.Map;
 
 /**
- * Interface for managing player data in a repository.
- *
- * <p>This interface defines the operations available for interacting with player records,
- * including adding, removing, and retrieving players.</p>
- *
- * @param <T> the type of the identifier used for players
+ * Repository interface for managing Player entities.
+ * Extends the generic CrudRepository for basic CRUD operations
+ * and provides additional methods specific to Player operations.
  */
-public interface PlayerRepository<T> {
+public interface PlayerRepository extends CrudRepository<Player, Long> {
 
     /**
-     * Retrieves all players in the repository.
+     * Retrieves the ranking of players based on their scores.
+     * The ranking is represented as a map where the key is the score
+     * and the value is the player's login.
      *
-     * @return a map of all players, keyed by their identifiers
+     * @return a Map containing player scores and their corresponding logins
      */
-    Map<T, Player> getAll();
-
-    /**
-     * Gets a list of all players.
-     *
-     * @return a list containing all players
-     */
-    List<Player> getPlayers();
-
-    /**
-     * Adds a new player to the repository.
-     *
-     * @param p the player to add
-     */
-    void addPlayer(Player p);
-
-    /**
-     * Checks if a player with the specified ID exists in the repository.
-     *
-     * @param id the ID of the player to check
-     * @return true if the player exists; false otherwise
-     */
-    boolean containsID(Long id);
-
-    /**
-     * Checks if the specified player exists in the repository.
-     *
-     * @param player the player to check
-     * @return true if the player exists; false otherwise
-     */
-    boolean containsValue(Player player);
-
-    /**
-     * Finds a player by their ID.
-     *
-     * @param id the ID of the player to find
-     * @return the player associated with the given ID, or null if not found
-     */
-    Player findByID(Long id);
-
-    /**
-     * Removes a player from the repository by their ID.
-     *
-     * @param id the ID of the player to remove
-     */
-    void removeByID(Long id);
+    Map<Integer, String> getPlayersRanking();
 }

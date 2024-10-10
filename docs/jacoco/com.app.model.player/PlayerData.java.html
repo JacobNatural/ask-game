@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PlayerData.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ask-game</a> &gt; <a href="index.source.html" class="el_package">com.app.model.player</a> &gt; <span class="el_source">PlayerData.java</span></div><h1>PlayerData.java</h1><pre class="source lang-java linenums">package com.app.model.player;
+
+import com.app.repository.model.Player;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
+
+import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Represents a player's data, including their statistics and identification details.
+ * &lt;p&gt;
+ * This class contains the player's ID, login, and a map of statistics that tracks their scores
+ * associated with specific timestamps.
+ * &lt;/p&gt;
+ */
+@RequiredArgsConstructor
+@EqualsAndHashCode(of = {&quot;login&quot;})
+@ToString
+public class PlayerData {
+    final Long id;
+    final String login;
+    final Map&lt;LocalDateTime, Integer&gt; statistics;
+
+    /**
+     * Retrieves the highest score from the player's statistics.
+     *
+     * @return The highest score as an integer.
+     */
+    public int getTheBestScore() {
+<span class="fc" id="L34">        return statistics</span>
+<span class="fc" id="L35">                .values()</span>
+<span class="fc" id="L36">                .stream()</span>
+<span class="fc" id="L37">                .max(Comparator.naturalOrder())</span>
+<span class="fc" id="L38">                .orElseThrow();</span>
+    }
+
+    /**
+     * Creates a {@link PlayerData} instance from a {@link Player} object.
+     *
+     * @param player The player object to create the {@link PlayerData} from.
+     * @return A new {@link PlayerData} instance initialized with the player's ID and login,
+     *         and an empty statistics map.
+     */
+    public static PlayerData fromPlayer(Player player) {
+<span class="fc" id="L49">        return new PlayerData(player.getId(), player.getLogin(), new HashMap&lt;&gt;());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

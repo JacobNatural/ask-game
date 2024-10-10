@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>QuestDifficultyLevelCacheServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ask-game</a> &gt; <a href="index.source.html" class="el_package">com.app.service.impl</a> &gt; <span class="el_source">QuestDifficultyLevelCacheServiceImpl.java</span></div><h1>QuestDifficultyLevelCacheServiceImpl.java</h1><pre class="source lang-java linenums">package com.app.service.impl;
+
+import com.app.converter.FromQuestWithAnswerToQuestData;
+import com.app.model.difficulty_level.DifficultyLevel;
+import com.app.repository.QuestWithAnswerRepository;
+import com.app.repository.model.Quest;
+import com.app.service.QuestCacheService;
+import com.app.service.impl.generic.AbstractQuestCacheService;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.PostConstruct;
+
+/**
+ * Implementation of QuestCacheService for caching quests based on their difficulty levels.
+ * This service retrieves quests from the repository and groups them by their difficulty level.
+ */
+@Service
+public class QuestDifficultyLevelCacheServiceImpl extends AbstractQuestCacheService&lt;DifficultyLevel&gt;
+        implements QuestCacheService&lt;DifficultyLevel&gt; {
+
+    /**
+     * Constructs an instance of QuestDifficultyLevelCacheServiceImpl.
+     *
+     * @param questWithAnswerRepository the repository for fetching quests and their answers
+     * @param fromQuestWithAnswerToQuestData the converter that maps QuestWithAnswer to QuestData
+     */
+    public QuestDifficultyLevelCacheServiceImpl(
+            QuestWithAnswerRepository questWithAnswerRepository,
+            FromQuestWithAnswerToQuestData fromQuestWithAnswerToQuestData) {
+<span class="fc" id="L30">        super(questWithAnswerRepository, fromQuestWithAnswerToQuestData);</span>
+<span class="fc" id="L31">    }</span>
+
+    /**
+     * Initializes the cache with quests grouped by their difficulty level.
+     * This method is called automatically after the bean's properties have been set.
+     */
+    @PostConstruct
+    public void postConstruct() {
+<span class="fc" id="L39">        refresh(Quest::getDifficultyLevel);</span>
+<span class="fc" id="L40">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

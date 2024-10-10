@@ -5,10 +5,13 @@
 
 ## Overview
 
-This project is designed to manage a quiz-based game where players answer randomly generated questions. 
-The application includes features such as player management, question generation based on difficulty levels, 
-answer validation, and score calculation. The game also tracks the specific time of play, 
+This project is designed to manage a quiz-based game where players answer randomly generated questions.
+The application includes features such as player management, question generation based on difficulty levels,
+answer validation, and score calculation. The game also tracks the specific time of play,
 providing players with a comprehensive overview of their performance.
+
+## New Feature: MySQL Integration
+The application now includes MySQL integration for persistent data storage. MySQL is set up using Docker, and a pre-defined database schema is initialized via an init.sql script. The docker-compose.yml file manages the database setup and configuration.
 
 ## Getting Started
 
@@ -16,6 +19,7 @@ providing players with a comprehensive overview of their performance.
 
 - **Java Development Kit (JDK) 22+**
 - **Apache Maven 3.9.6+**
+- **Docker (to set up MySQL)**
 
 ### Cloning the Repository:
 - To clone the repository and navigate into the project directory, run:
@@ -23,12 +27,18 @@ providing players with a comprehensive overview of their performance.
 git clone https://github.com/JacobNatural/ask-game.git
 cd ask-game
 ```
+### Running the MySQL Database in Docker
+- Run the following command to start the MySQL container and initialize the database:
+```bash
+docker-compose up --build -d 
+```
 
 ### Running Tests
 - To execute the tests, use the following command:
 ```bash
 mvn clean test
 ```
+
 
 ### Integrate into Your Project
 - If you want to use this application as a dependency in another Maven project,

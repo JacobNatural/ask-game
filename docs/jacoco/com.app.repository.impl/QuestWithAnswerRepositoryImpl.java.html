@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>QuestWithAnswerRepositoryImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ask-game</a> &gt; <a href="index.source.html" class="el_package">com.app.repository.impl</a> &gt; <span class="el_source">QuestWithAnswerRepositoryImpl.java</span></div><h1>QuestWithAnswerRepositoryImpl.java</h1><pre class="source lang-java linenums">package com.app.repository.impl;
+
+import com.app.repository.QuestWithAnswerRepository;
+import com.app.repository.model.QuestWithAnswer;
+import lombok.RequiredArgsConstructor;
+import org.jdbi.v3.core.Jdbi;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+/**
+ * Implementation of the QuestWithAnswerRepository interface for managing quests with their associated answers.
+ * This class provides methods to retrieve quests along with their answers from the database.
+ */
+@Repository
+@RequiredArgsConstructor
+public class QuestWithAnswerRepositoryImpl implements QuestWithAnswerRepository {
+    private final Jdbi jdbi;
+
+    /**
+     * Retrieves a quest with its answers based on the provided quest ID.
+     *
+     * @param id The ID of the quest to retrieve.
+     * @return A list of QuestWithAnswer objects associated with the specified quest ID.
+     */
+    public List&lt;QuestWithAnswer&gt; findQuestWithAnswer(Long id) {
+<span class="fc" id="L27">        var sql = &quot;&quot;&quot;</span>
+                select q.id, q.difficulty_level, q.category, q.question, a.answer, a.confirm
+                from quests q join answers a on q.id = a.quest_id where q.id = :id;&quot;&quot;&quot;;
+
+<span class="fc" id="L31">        return jdbi.withHandle(handle -&gt;</span>
+                handle
+<span class="fc" id="L33">                        .createQuery(sql)</span>
+<span class="fc" id="L34">                        .bind(&quot;id&quot;, id)</span>
+<span class="fc" id="L35">                        .mapToBean(QuestWithAnswer.class)</span>
+<span class="fc" id="L36">                        .list());</span>
+    }
+
+    /**
+     * Retrieves all quests along with their answers.
+     *
+     * @return A list of all QuestWithAnswer objects in the database.
+     */
+    public List&lt;QuestWithAnswer&gt; findQuestsWithAnswers() {
+<span class="fc" id="L45">        var sql = &quot;&quot;&quot;</span>
+                select q.id, q.difficulty_level, q.category, q.question, a.answer, a.confirm
+                from quests q join answers a on q.id = a.quest_id&quot;&quot;&quot;;
+
+<span class="fc" id="L49">        return jdbi.withHandle(handle -&gt;</span>
+<span class="fc" id="L50">                handle</span>
+<span class="fc" id="L51">                        .createQuery(sql)</span>
+<span class="fc" id="L52">                        .mapToBean(QuestWithAnswer.class)</span>
+<span class="fc" id="L53">                        .list());</span>
+    }
+
+    /**
+     * Retrieves quests with their answers based on a list of quest IDs.
+     *
+     * @param ids A list of quest IDs to retrieve.
+     * @return A list of QuestWithAnswer objects associated with the specified quest IDs.
+     */
+    public List&lt;QuestWithAnswer&gt; findQuestsWithAnswersByIds(List&lt;Long&gt; ids) {
+<span class="fc" id="L63">        var sql = &quot;&quot;&quot;</span>
+                select q.id, q.difficulty_level, q.category, q.question, a.answer, a.confirm
+                from quests q join answers a on q.id = a.quest_id where q.id in (&lt;ids&gt;)&quot;&quot;&quot;;
+
+<span class="fc" id="L67">        var items = jdbi.withHandle(handle -&gt;</span>
+<span class="fc" id="L68">                handle.createQuery(sql)</span>
+<span class="fc" id="L69">                        .bindList(&quot;ids&quot;, ids)</span>
+<span class="fc" id="L70">                        .mapToBean(QuestWithAnswer.class)</span>
+<span class="fc" id="L71">                        .list());</span>
+
+<span class="fc" id="L73">        return items;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

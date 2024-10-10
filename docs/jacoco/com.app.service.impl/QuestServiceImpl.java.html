@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>QuestServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ask-game</a> &gt; <a href="index.source.html" class="el_package">com.app.service.impl</a> &gt; <span class="el_source">QuestServiceImpl.java</span></div><h1>QuestServiceImpl.java</h1><pre class="source lang-java linenums">package com.app.service.impl;
+
+import com.app.converter.FromQuestWithAnswerToQuestData;
+import com.app.model.difficulty_level.DifficultyLevel;
+import com.app.dto.AnswersDto;
+import com.app.repository.model.Quest;
+import com.app.service.QuestCacheService;
+import com.app.service.QuestService;
+import com.app.model.quest.QuestData;
+import com.app.repository.AnswerRepository;
+import com.app.repository.QuestRepository;
+import com.app.repository.QuestWithAnswerRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.*;
+
+/**
+ * Implementation of the QuestService interface, providing functionalities for managing quests.
+ */
+@Service
+@RequiredArgsConstructor
+public class QuestServiceImpl implements QuestService {
+    private final QuestRepository questRepository;
+    private final AnswerRepository answerRepository;
+    private final QuestWithAnswerRepository questWithAnswerRepository;
+    private final QuestCacheService&lt;DifficultyLevel&gt; questCacheService;
+    private final FromQuestWithAnswerToQuestData fromQuestWithAnswerToQuestData;
+    private static final int AMOUNT_OF_ASK = 4;
+    /**
+     * Adds a new quest along with its associated answers to the repository.
+     *
+     * @param quest the QuestData object containing quest and answer information.
+     * @return the saved QuestData object after persisting it to the database.
+     * @throws IllegalArgumentException if the provided quest is null.
+     */
+    @Override
+    public QuestData addQuest(QuestData quest) {
+<span class="fc bfc" id="L39" title="All 2 branches covered.">        if (quest == null) {</span>
+<span class="fc" id="L40">            throw new IllegalArgumentException(&quot;Quest cannot be null&quot;);</span>
+        }
+
+<span class="fc" id="L43">        return QuestData.fromQuestAndAnswers(</span>
+<span class="fc" id="L44">                questRepository.save(quest.toQuest()),</span>
+<span class="fc" id="L45">                answerRepository.saveAll(quest.toAnswer()));</span>
+    }
+
+    /**
+     * Removes a quest identified by its ID from the repository.
+     *
+     * @param questId the ID of the quest to be removed.
+     * @return the QuestData object representing the removed quest.
+     */
+    @Override
+    public QuestData removeQuest(Long questId) {
+<span class="fc" id="L56">        return QuestData.fromQuest(questRepository.delete(questId));</span>
+    }
+
+    /**
+     * Retrieves a quest along with its associated answers using its ID.
+     *
+     * @param questID the ID of the quest to be retrieved.
+     * @return the QuestData object containing the quest and its answers.
+     */
+    @Override
+    public QuestData findQuest(Long questID) {
+<span class="fc" id="L67">        return fromQuestWithAnswerToQuestData</span>
+<span class="fc" id="L68">                .toList(questWithAnswerRepository.findQuestWithAnswer(questID))</span>
+<span class="fc" id="L69">                .getFirst();</span>
+    }
+
+    /**
+     * Generates a list of random quests based on the configured number of questions to ask.
+     *
+     * @return a list of randomly selected QuestData objects.
+     */
+    @Override
+    public List&lt;QuestData&gt; generateRandomsQuests() {
+<span class="fc" id="L79">        return questCacheService</span>
+<span class="fc" id="L80">                .getAll()</span>
+<span class="fc" id="L81">                .values()</span>
+<span class="fc" id="L82">                .stream()</span>
+<span class="fc" id="L83">                .map(questList -&gt; getRandomLimited(AMOUNT_OF_ASK, new ArrayList&lt;&gt;(questList)))</span>
+<span class="fc" id="L84">                .flatMap(Collection::stream)</span>
+<span class="fc" id="L85">                .toList();</span>
+    }
+
+    /**
+     * Calculates the total points based on the provided answers.
+     *
+     * @param answersDto the AnswersDto object containing the player’s answers.
+     * @return the total points calculated based on correct answers.
+     * @throws IllegalArgumentException if the provided answersDto is null.
+     */
+    @Override
+    public int calculatePoints(AnswersDto answersDto) {
+<span class="fc bfc" id="L97" title="All 2 branches covered.">        if (answersDto == null) {</span>
+<span class="fc" id="L98">            throw new IllegalArgumentException(&quot;AnswersDto cannot be null&quot;);</span>
+        }
+
+<span class="fc" id="L101">        var questDataMap = getQuestData(new ArrayList&lt;&gt;(answersDto.answers().keySet()));</span>
+
+<span class="fc" id="L103">        return answersDto</span>
+<span class="fc" id="L104">                .answers()</span>
+<span class="fc" id="L105">                .entrySet()</span>
+<span class="fc" id="L106">                .stream()</span>
+<span class="fc" id="L107">                .map(answerDto -&gt; {</span>
+<span class="fc bfc" id="L108" title="All 2 branches covered.">                    if (!questDataMap.containsKey(answerDto.getKey())) {</span>
+<span class="fc" id="L109">                        return 0;</span>
+                    }
+<span class="fc" id="L111">                    return questDataMap.get(answerDto.getKey())</span>
+<span class="fc" id="L112">                            .calculatePoints(answerDto.getValue());</span>
+                })
+<span class="fc" id="L114">                .reduce(0, Integer::sum);  // Default to 0 for empty cases</span>
+    }
+
+    /**
+     * Retrieves quest data for the specified list of quest IDs.
+     *
+     * @param questIds a list of quest IDs for which to retrieve data.
+     * @return a map of quest IDs to their corresponding QuestData objects.
+     */
+    private Map&lt;Long, QuestData&gt; getQuestData(List&lt;Long&gt; questIds) {
+<span class="fc" id="L124">        return fromQuestWithAnswerToQuestData</span>
+<span class="fc" id="L125">                .toMap(questWithAnswerRepository.findQuestsWithAnswersByIds(questIds), Quest::getId);</span>
+    }
+
+    /**
+     * Selects a limited number of random quests from a provided list.
+     *
+     * @param n the number of quests to select.
+     * @param quests the list of quests to choose from.
+     * @return a list containing randomly selected QuestData objects.
+     * @throws IllegalArgumentException if there are not enough quests to select from.
+     */
+    private List&lt;QuestData&gt; getRandomLimited(int n, List&lt;QuestData&gt; quests) {
+<span class="fc bfc" id="L137" title="All 2 branches covered.">        if (quests.size() &lt; n) {</span>
+<span class="fc" id="L138">            throw new IllegalArgumentException(&quot;Not enough quests&quot;);</span>
+        }
+<span class="fc" id="L140">        var randomAnswers = new ArrayList&lt;QuestData&gt;();</span>
+
+<span class="fc bfc" id="L142" title="All 2 branches covered.">        for (int i = 0; i &lt; n; i++) {</span>
+<span class="fc" id="L143">            int randIndex = randNumber(0, quests.size());</span>
+<span class="fc" id="L144">            var randQuestion = quests.get(randIndex);</span>
+<span class="fc" id="L145">            randomAnswers.add(randQuestion);</span>
+<span class="fc" id="L146">            quests.remove(randIndex);  // Remove by index to maintain list integrity</span>
+        }
+<span class="fc" id="L148">        return randomAnswers;</span>
+    }
+
+    private static int randNumber(int min, int max){
+<span class="fc" id="L152">        return new Random().nextInt(min, max);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

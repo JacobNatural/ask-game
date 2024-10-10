@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AbstractCrudRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ask-game</a> &gt; <a href="index.source.html" class="el_package">com.app.repository.impl.generic.impl</a> &gt; <span class="el_source">AbstractCrudRepository.java</span></div><h1>AbstractCrudRepository.java</h1><pre class="source lang-java linenums">package com.app.repository.impl.generic.impl;
+
+import com.app.model.difficulty_level.DifficultyLevel;
+import com.app.repository.impl.generic.CrudRepository;
+import com.google.common.base.CaseFormat;
+import lombok.RequiredArgsConstructor;
+import org.atteo.evo.inflector.English;
+import org.jdbi.v3.core.Jdbi;
+
+import java.lang.reflect.ParameterizedType;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+/**
+ * Abstract implementation of a CRUD repository, providing generic methods for
+ * persisting and retrieving entities from a database using JDBI.
+ *
+ * @param &lt;T&gt; The type of the entity managed by this repository.
+ * @param &lt;ID&gt; The type of the entity's identifier.
+ */
+@RequiredArgsConstructor
+public class AbstractCrudRepository&lt;T, ID&gt; implements CrudRepository&lt;T, ID&gt; {
+    protected final Jdbi jdbi;
+
+    private final Class&lt;T&gt; entityType =
+            (Class&lt;T&gt;) ((ParameterizedType) super.getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+
+    /**
+     * Saves a new entity to the database.
+     *
+     * @param item The entity to be saved.
+     * @return The saved entity with its generated ID.
+     */
+    @Override
+    public T save(T item) {
+<span class="fc" id="L40">        var sql = &quot;insert into %s %s values %s;&quot;.formatted(</span>
+<span class="fc" id="L41">                tableName(),</span>
+<span class="fc" id="L42">                columnNamesForInsert(),</span>
+<span class="fc" id="L43">                columnValuesForInsert(item));</span>
+
+<span class="fc" id="L45">        jdbi.useHandle(handle -&gt; handle.execute(sql));</span>
+
+<span class="fc" id="L47">        return findLast(1).getFirst();</span>
+    }
+
+    /**
+     * Saves a list of entities to the database.
+     *
+     * @param items The list of entities to be saved.
+     * @return A list of saved entities with their generated IDs.
+     */
+    @Override
+    public List&lt;T&gt; saveAll(List&lt;T&gt; items) {
+<span class="fc" id="L58">        var sql = &quot;insert into %s %s values %s;&quot;.formatted(</span>
+<span class="fc" id="L59">                tableName(),</span>
+<span class="fc" id="L60">                columnNamesForInsert(),</span>
+                items
+<span class="fc" id="L62">                        .stream()</span>
+<span class="fc" id="L63">                        .map(this::columnValuesForInsert)</span>
+<span class="fc" id="L64">                        .collect(Collectors.joining(&quot;, &quot;)));</span>
+
+<span class="fc" id="L66">        jdbi.useHandle(handle -&gt; handle.execute(sql));</span>
+
+<span class="fc" id="L68">        return findLast(items.size());</span>
+    }
+
+    /**
+     * Deletes an entity from the database by its ID.
+     *
+     * @param id The ID of the entity to be deleted.
+     * @return The deleted entity.
+     * @throws IllegalArgumentException If the entity with the specified ID is not found.
+     */
+    @Override
+    public T delete(ID id) {
+<span class="fc" id="L80">        var sql = &quot;delete from %s where id = :id;&quot;.formatted(tableName());</span>
+
+<span class="fc" id="L82">        var itemToDelete = findById(id)</span>
+<span class="fc" id="L83">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Id not found&quot;));</span>
+<span class="fc" id="L84">        jdbi.useHandle(handle -&gt;</span>
+                handle
+<span class="fc" id="L86">                        .createUpdate(sql)</span>
+<span class="fc" id="L87">                        .bind(&quot;id&quot;, id)</span>
+<span class="fc" id="L88">                        .execute()</span>
+        );
+
+<span class="fc" id="L91">        return itemToDelete;</span>
+    }
+
+    /**
+     * Finds an entity by its ID.
+     *
+     * @param id The ID of the entity to be found.
+     * @return An Optional containing the found entity, or an empty Optional if no entity is found.
+     */
+    @Override
+    public Optional&lt;T&gt; findById(ID id) {
+<span class="fc" id="L102">        var sql = &quot;select * from &quot; + tableName() + &quot; where id = :id&quot;;</span>
+
+<span class="fc" id="L104">        return jdbi.withHandle(handle -&gt;</span>
+<span class="fc" id="L105">                handle.createQuery(sql)</span>
+<span class="fc" id="L106">                        .bind(&quot;id&quot;, id)</span>
+<span class="fc" id="L107">                        .mapToBean(entityType)</span>
+<span class="fc" id="L108">                        .findFirst());</span>
+    }
+
+    /**
+     * Finds the last N entities in the database, ordered by their IDs in descending order.
+     *
+     * @param n The number of entities to retrieve.
+     * @return A list of the last N entities.
+     */
+    @Override
+    public List&lt;T&gt; findLast(int n) {
+<span class="fc" id="L119">        var sql = &quot;select * from %s order by id desc limit :n&quot;.formatted(tableName());</span>
+
+<span class="fc" id="L121">        return jdbi.withHandle(handle -&gt;</span>
+                handle
+<span class="fc" id="L123">                        .createQuery(sql)</span>
+<span class="fc" id="L124">                        .bind(&quot;n&quot;, n)</span>
+<span class="fc" id="L125">                        .mapToBean(entityType)</span>
+<span class="fc" id="L126">                        .list());</span>
+    }
+
+    /**
+     * Finds all entities with the specified IDs.
+     *
+     * @param ids A list of IDs of the entities to be found.
+     * @return A list of entities with the specified IDs.
+     */
+    @Override
+    public List&lt;T&gt; findAllById(List&lt;ID&gt; ids) {
+<span class="fc" id="L137">        var sql = &quot;select * from %s where id in (&lt;ids&gt;)&quot;.formatted(tableName());</span>
+
+<span class="fc" id="L139">        return jdbi.withHandle(handle -&gt;</span>
+<span class="fc" id="L140">                handle.createQuery(sql)</span>
+<span class="fc" id="L141">                        .bindList(&quot;ids&quot;, ids)</span>
+<span class="fc" id="L142">                        .mapToBean(entityType)</span>
+<span class="fc" id="L143">                        .list());</span>
+    }
+
+    /**
+     * Finds all entities in the database.
+     *
+     * @return A list of all entities.
+     */
+    @Override
+    public List&lt;T&gt; findAll() {
+<span class="fc" id="L153">        var sql = &quot;select * from %s&quot;.formatted(tableName());</span>
+<span class="fc" id="L154">        return jdbi.withHandle(handle -&gt;</span>
+<span class="fc" id="L155">                handle</span>
+<span class="fc" id="L156">                        .createQuery(sql)</span>
+<span class="fc" id="L157">                        .mapToBean(entityType)</span>
+<span class="fc" id="L158">                        .list());</span>
+    }
+
+    /**
+     * Converts a string from UpperCamelCase to lower_underscore format.
+     *
+     * @param upperCamel The string to be converted.
+     * @return The converted string in lower_underscore format.
+     */
+    private String toLowerUnderScore(String upperCamel) {
+<span class="fc" id="L168">        return CaseFormat.UPPER_CAMEL.to(</span>
+                CaseFormat.LOWER_UNDERSCORE,
+                upperCamel);
+    }
+
+    /**
+     * Retrieves the table name corresponding to the entity type.
+     *
+     * @return The pluralized table name in lower_underscore format.
+     */
+    private String tableName() {
+<span class="fc" id="L179">        return English.plural(CaseFormat.UPPER_CAMEL.to(</span>
+                CaseFormat.LOWER_UNDERSCORE,
+<span class="fc" id="L181">                entityType.getSimpleName()));</span>
+    }
+
+    /**
+     * Constructs a comma-separated list of column names for insertion, excluding the ID column.
+     *
+     * @return A string representing the column names for insertion.
+     */
+    private String columnNamesForInsert() {
+<span class="fc" id="L190">        var cols = Arrays</span>
+<span class="fc" id="L191">                .stream(entityType.getDeclaredFields())</span>
+<span class="fc bfc" id="L192" title="All 2 branches covered.">                .filter(field -&gt; !field.getName().equalsIgnoreCase(&quot;id&quot;))</span>
+<span class="fc" id="L193">                .map(field -&gt; toLowerUnderScore(field.getName()))</span>
+<span class="fc" id="L194">                .collect(Collectors.joining(&quot;, &quot;));</span>
+<span class="fc" id="L195">        return &quot;( %s )&quot;.formatted(cols);</span>
+    }
+
+    /**
+     * Constructs a string of column values for insertion into the database.
+     *
+     * @param item The entity for which to retrieve column values.
+     * @return A string representing the values to be inserted, formatted for SQL.
+     */
+    private String columnValuesForInsert(T item) {
+<span class="fc" id="L205">        var values = Arrays</span>
+<span class="fc" id="L206">                .stream(entityType.getDeclaredFields())</span>
+<span class="fc bfc" id="L207" title="All 2 branches covered.">                .filter(field -&gt; !field.getName().equalsIgnoreCase(&quot;id&quot;))</span>
+<span class="fc" id="L208">                .map(field -&gt; {</span>
+                    try {
+<span class="fc" id="L210">                        field.setAccessible(true);</span>
+
+<span class="pc bpc" id="L212" title="1 of 2 branches missed.">                        if (field.get(item) == null) {</span>
+<span class="nc" id="L213">                            return &quot;NULL&quot;;</span>
+                        }
+
+<span class="fc" id="L216">                        if (List.of(</span>
+                                String.class,
+                                Enum.class,
+                                DifficultyLevel.class,
+                                LocalDateTime.class,
+<span class="fc bfc" id="L221" title="All 2 branches covered.">                                LocalDate.class).contains(field.getType())) {</span>
+<span class="fc" id="L222">                            return &quot;'%s'&quot;.formatted(field.get(item));</span>
+                        }
+<span class="fc" id="L224">                        return field.get(item).toString();</span>
+<span class="nc" id="L225">                    } catch (Exception e) {</span>
+<span class="nc" id="L226">                        throw new IllegalArgumentException(&quot;Getting columns value failed&quot;, e);</span>
+                    }
+<span class="fc" id="L228">                }).collect(Collectors.joining(&quot;, &quot;));</span>
+<span class="fc" id="L229">        return &quot;( %s )&quot;.formatted(values);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

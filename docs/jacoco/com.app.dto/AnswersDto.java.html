@@ -1,20 +1,13 @@
-<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AnswersDto.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Ask_Game_Maven</a> &gt; <a href="index.source.html" class="el_package">com.app.dto</a> &gt; <span class="el_source">AnswersDto.java</span></div><h1>AnswersDto.java</h1><pre class="source lang-java linenums">package com.app.dto;
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AnswersDto.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ask-game</a> &gt; <a href="index.source.html" class="el_package">com.app.dto</a> &gt; <span class="el_source">AnswersDto.java</span></div><h1>AnswersDto.java</h1><pre class="source lang-java linenums">package com.app.dto;
 
 import java.util.Map;
 
 /**
- * Data Transfer Object (DTO) representing the answers submitted by a player.
+ * A Data Transfer Object (DTO) representing a collection of answers submitted by a player.
  *
- * &lt;p&gt;This record holds the following data:
- * &lt;ul&gt;
- *     &lt;li&gt;{@link #playerId()} - The unique ID of the player submitting the answers.&lt;/li&gt;
- *     &lt;li&gt;{@link #answers()} - A map containing the player's answers, where the key is the question ID
- *     and the value is the player's submitted answer as a {@link String}.&lt;/li&gt;
- * &lt;/ul&gt;
- *
- * @param playerId the ID of the player
- * @param answers  a map of question IDs and the corresponding player's answers
+ * @param playerId The ID of the player submitting the answers.
+ * @param answers A map where the keys are question IDs (Long) and the values are the corresponding answers (String).
  */
-<span class="fc" id="L18">public record AnswersDto(Long playerId, Map&lt;Long, String&gt; answers) {</span>
+<span class="fc" id="L11">public record AnswersDto(Long playerId, Map&lt;Long, String&gt; answers) {</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

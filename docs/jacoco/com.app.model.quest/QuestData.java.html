@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>QuestData.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ask-game</a> &gt; <a href="index.source.html" class="el_package">com.app.model.quest</a> &gt; <span class="el_source">QuestData.java</span></div><h1>QuestData.java</h1><pre class="source lang-java linenums">package com.app.model.quest;
+
+import com.app.model.difficulty_level.DifficultyLevel;
+import com.app.dto.QuestDto;
+import com.app.repository.model.Answer;
+import com.app.repository.model.Quest;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+/**
+ * Represents the data of a quest, including its question, answers, and difficulty level.
+ * &lt;p&gt;
+ * This class encapsulates details about a quest, including the question text, difficulty level,
+ * category, and possible answers with their correctness status.
+ * &lt;/p&gt;
+ */
+@EqualsAndHashCode(of = {&quot;question&quot;})
+@ToString
+public class QuestData {
+    final Long id;
+    final DifficultyLevel difficultyLevel;
+    final String category;
+    final String question;
+    public final Map&lt;String, Boolean&gt; answers;
+
+    /**
+     * Constructs a new QuestData instance.
+     *
+     * @param id             The unique identifier of the quest.
+     * @param difficultyLevel The difficulty level of the quest.
+     * @param category       The category of the quest.
+     * @param question       The question text of the quest.
+     * @param answers        A map of possible answers and their correctness status.
+     */
+<span class="fc" id="L38">    public QuestData(Long id, DifficultyLevel difficultyLevel, String category, String question, Map&lt;String, Boolean&gt; answers) {</span>
+<span class="fc" id="L39">        this.id = id;</span>
+<span class="fc" id="L40">        this.difficultyLevel = difficultyLevel;</span>
+<span class="fc" id="L41">        this.category = category;</span>
+<span class="fc" id="L42">        this.question = question;</span>
+<span class="fc" id="L43">        this.answers = answers;</span>
+<span class="fc" id="L44">    }</span>
+
+    /**
+     * Constructs a new QuestData instance from a Quest object and its associated answers.
+     *
+     * @param quest  The Quest object containing basic quest information.
+     * @param answers A map of possible answers and their correctness status.
+     */
+<span class="fc" id="L52">    public QuestData(Quest quest, Map&lt;String, Boolean&gt; answers) {</span>
+<span class="fc" id="L53">        this.id = quest.getId();</span>
+<span class="fc" id="L54">        this.difficultyLevel = quest.getDifficultyLevel();</span>
+<span class="fc" id="L55">        this.category = quest.getCategory();</span>
+<span class="fc" id="L56">        this.question = quest.getQuestion();</span>
+<span class="fc" id="L57">        this.answers = answers;</span>
+<span class="fc" id="L58">    }</span>
+
+    // A map to define point values for each difficulty level.
+<span class="fc" id="L61">    static final Map&lt;DifficultyLevel, Integer&gt; scores = Map.of(</span>
+<span class="fc" id="L62">            DifficultyLevel.A, 10,</span>
+<span class="fc" id="L63">            DifficultyLevel.B, 15,</span>
+<span class="fc" id="L64">            DifficultyLevel.C, 20);</span>
+
+    /**
+     * Creates a QuestData instance from a Quest object and a list of answers.
+     *
+     * @param quest  The Quest object containing basic quest information.
+     * @param answers A list of Answer objects representing the possible answers.
+     * @return A new QuestData instance initialized with the quest and answer details.
+     */
+    public static QuestData fromQuestAndAnswers(Quest quest, List&lt;Answer&gt; answers) {
+<span class="fc" id="L74">        return new QuestData(</span>
+<span class="fc" id="L75">                quest.getId(),</span>
+<span class="fc" id="L76">                quest.getDifficultyLevel(),</span>
+<span class="fc" id="L77">                quest.getCategory(),</span>
+<span class="fc" id="L78">                quest.getQuestion(),</span>
+<span class="fc" id="L79">                toAnswersMap(answers));</span>
+    }
+
+    /**
+     * Creates a QuestData instance from a Quest object, initializing with an empty answers map.
+     *
+     * @param quest The Quest object containing basic quest information.
+     * @return A new QuestData instance initialized with the quest details and an empty answers map.
+     */
+    public static QuestData fromQuest(Quest quest) {
+<span class="fc" id="L89">        return new QuestData(</span>
+<span class="fc" id="L90">                quest.getId(),</span>
+<span class="fc" id="L91">                quest.getDifficultyLevel(),</span>
+<span class="fc" id="L92">                quest.getCategory(),</span>
+<span class="fc" id="L93">                quest.getQuestion(),</span>
+                new HashMap&lt;&gt;());
+    }
+
+    /**
+     * Creates a QuestDto instance representing the quest data.
+     *
+     * @return A QuestDto object containing the quest's ID, difficulty level, category,
+     *         question text, and possible answers.
+     */
+    public QuestDto createQuestDto() {
+<span class="fc" id="L104">        var map = new HashMap&lt;String, String&gt;();</span>
+<span class="fc" id="L105">        var index = 'a';</span>
+
+<span class="fc bfc" id="L107" title="All 2 branches covered.">        for (var answer : answers.keySet().stream().sorted(Comparator.naturalOrder()).toList()) {</span>
+<span class="fc" id="L108">            map.put(String.valueOf(index), answer);</span>
+<span class="fc" id="L109">            index++;</span>
+<span class="fc" id="L110">        }</span>
+<span class="fc" id="L111">        return new QuestDto(id, difficultyLevel, category, question, map);</span>
+    }
+
+    /**
+     * Calculates the points awarded for a given answer based on its correctness and the quest's difficulty level.
+     *
+     * @param answer The answer provided by the user.
+     * @return The points awarded, or 0 if the answer is incorrect.
+     */
+    public int calculatePoints(String answer) {
+<span class="fc" id="L121">        var isCorrect = answers.get(answer);</span>
+<span class="pc bpc" id="L122" title="1 of 4 branches missed.">        if (isCorrect != null &amp;&amp; isCorrect) {</span>
+<span class="fc" id="L123">            return scores.get(difficultyLevel);</span>
+        }
+<span class="fc" id="L125">        return 0;</span>
+    }
+
+    /**
+     * Converts this QuestData instance back into a Quest object.
+     *
+     * @return A new Quest object initialized with this QuestData's properties.
+     */
+    public Quest toQuest() {
+<span class="fc" id="L134">        return new Quest(id, difficultyLevel, category, question);</span>
+    }
+
+    /**
+     * Converts this QuestData's answers to a list of Answer objects.
+     *
+     * @return A list of Answer objects representing the quest's answers.
+     */
+    public List&lt;Answer&gt; toAnswer() {
+<span class="fc" id="L143">        return answers</span>
+<span class="fc" id="L144">                .entrySet()</span>
+<span class="fc" id="L145">                .stream()</span>
+<span class="fc" id="L146">                .map(map -&gt; new Answer(null, id, map.getKey(), map.getValue()))</span>
+<span class="fc" id="L147">                .toList();</span>
+    }
+
+    /**
+     * Converts a list of Answer objects into a map of answer text to its correctness status.
+     *
+     * @param answers A list of Answer objects to convert.
+     * @return A map of answers and their correctness status.
+     */
+    private static Map&lt;String, Boolean&gt; toAnswersMap(List&lt;Answer&gt; answers) {
+<span class="fc" id="L157">        return answers</span>
+<span class="fc" id="L158">                .stream()</span>
+<span class="fc" id="L159">                .collect(Collectors.toMap(Answer::getAnswer, Answer::isConfirm));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

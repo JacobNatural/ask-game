@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AbstractQuestCacheService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ask-game</a> &gt; <a href="index.source.html" class="el_package">com.app.service.impl.generic</a> &gt; <span class="el_source">AbstractQuestCacheService.java</span></div><h1>AbstractQuestCacheService.java</h1><pre class="source lang-java linenums">package com.app.service.impl.generic;
+
+import com.app.converter.FromQuestWithAnswerToQuestData;
+import com.app.repository.QuestWithAnswerRepository;
+import com.app.repository.model.Quest;
+import com.app.service.QuestCacheService;
+import com.app.model.quest.QuestData;
+
+import java.util.*;
+import java.util.function.Function;
+
+/**
+ * Abstract class providing caching functionality for quests.
+ * This class handles the retrieval and storage of quest data
+ * in a map, allowing for efficient access and manipulation of
+ * quest-related information.
+ *
+ * @param &lt;T&gt; the type used as a key in the quest cache
+ */
+public abstract class AbstractQuestCacheService&lt;T&gt; implements QuestCacheService&lt;T&gt; {
+
+    protected final QuestWithAnswerRepository questWithAnswerRepository;
+    protected final FromQuestWithAnswerToQuestData fromQuestWithAnswerToQuestData;
+
+    protected Map&lt;T, List&lt;QuestData&gt;&gt; quests;
+
+    /**
+     * Constructs a new instance of AbstractQuestCacheService.
+     *
+     * @param questWithAnswerRepository the repository used to retrieve quests with answers
+     * @param fromQuestWithAnswerToQuestData the converter used to transform quests into quest data
+     */
+    protected AbstractQuestCacheService(QuestWithAnswerRepository questWithAnswerRepository,
+<span class="fc" id="L34">                                        FromQuestWithAnswerToQuestData fromQuestWithAnswerToQuestData) {</span>
+<span class="fc" id="L35">        this.questWithAnswerRepository = questWithAnswerRepository;</span>
+<span class="fc" id="L36">        this.fromQuestWithAnswerToQuestData = fromQuestWithAnswerToQuestData;</span>
+<span class="fc" id="L37">        this.quests = null;</span>
+<span class="fc" id="L38">    }</span>
+
+    /**
+     * Retrieves all quests in the cache.
+     *
+     * @return a map of quests with their corresponding quest data
+     */
+    @Override
+    public Map&lt;T, List&lt;QuestData&gt;&gt; getAll() {
+<span class="fc" id="L47">        return quests;</span>
+    }
+
+    /**
+     * Refreshes the cached quest data using the provided mapping function.
+     *
+     * @param map a function that maps a Quest to the type T used as a key
+     * @throws IllegalArgumentException if the provided mapping function is null
+     */
+    @Override
+    public void refresh(Function&lt;Quest, T&gt; map) {
+<span class="fc bfc" id="L58" title="All 2 branches covered.">        if (map == null) {</span>
+<span class="fc" id="L59">            throw new IllegalArgumentException(&quot;Mapper cannot be null&quot;);</span>
+        }
+
+<span class="fc" id="L62">        quests = fromQuestWithAnswerToQuestData</span>
+<span class="fc" id="L63">                .toGroupBy(questWithAnswerRepository.findQuestsWithAnswers(), map);</span>
+<span class="fc" id="L64">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
